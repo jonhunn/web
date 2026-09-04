@@ -3,87 +3,246 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hello, World</title>
+<title>Jon — Systems &amp; Automation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0b0f14;
-    --accent: #5eead4;
-    --accent2: #818cf8;
-    --text: #e5e7eb;
+    --bg: #0d1117;
+    --bg-raised: #11161d;
+    --line: #21262d;
+    --text: #c9d1d9;
+    --dim: #6e7681;
+    --amber: #e3b341;
+    --teal: #56d4dd;
+    --green: #7ee787;
   }
   * { box-sizing: border-box; }
-  html, body {
+  html { scroll-behavior: smooth; }
+  body {
     margin: 0;
-    height: 100%;
     background: var(--bg);
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overflow: hidden;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    line-height: 1.7;
   }
-  .stage {
-    height: 100%;
+  ::selection { background: var(--amber); color: #0d1117; }
+
+  a { color: var(--teal); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover { border-bottom-color: var(--teal); }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---- terminal chrome ---- */
+  .term {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 48px 0;
+  }
+  .term-bar {
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #161b22;
+    border-bottom: 1px solid var(--line);
   }
-  .glow {
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(94,234,212,0.15), transparent 70%);
-    filter: blur(10px);
-    animation: pulse 6s ease-in-out infinite;
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #30363d; }
+  .term-title {
+    margin-left: 8px;
+    font-size: 12px;
+    color: var(--dim);
   }
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.15); opacity: 1; }
-  }
-  h1 {
-    font-size: clamp(2.5rem, 8vw, 6rem);
-    font-weight: 800;
-    margin: 0;
-    letter-spacing: -0.03em;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    z-index: 1;
+  .term-body { padding: 22px 24px 26px; }
+
+  /* ---- hero / boot sequence ---- */
+  .hero { padding-top: 64px; }
+  .boot-line {
+    white-space: pre-wrap;
     opacity: 0;
-    transform: translateY(20px);
-    animation: rise 1s ease forwards 0.2s;
+    animation: appear 0.4s forwards;
   }
-  .cursor {
+  .boot-line .prompt { color: var(--green); }
+  .boot-line .path { color: var(--teal); }
+  .boot-line .out { color: var(--text); }
+  .boot-line .dim { color: var(--dim); }
+  .cursor-blink {
     display: inline-block;
-    width: 0.06em;
-    background: var(--accent);
+    width: 8px;
+    height: 1em;
+    background: var(--amber);
+    vertical-align: text-bottom;
     animation: blink 1s step-end infinite;
-    margin-left: 4px;
+    margin-left: 2px;
   }
-  @keyframes rise {
-    to { opacity: 1; transform: translateY(0); }
+  @keyframes appear { to { opacity: 1; } }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  h1, h2, h3 { font-weight: 600; letter-spacing: -0.01em; }
+
+  .role {
+    font-size: 1.6rem;
+    margin: 6px 0 4px;
+    color: var(--text);
   }
-  @keyframes blink {
-    50% { opacity: 0; }
+  .role .accent { color: var(--amber); }
+  .tagline { color: var(--dim); margin-bottom: 8px; }
+
+  section { padding: 40px 0; border-top: 1px solid var(--line); }
+  section:first-of-type { border-top: none; }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 18px;
   }
-  .sub {
-    position: absolute;
-    bottom: 8%;
-    font-size: 0.9rem;
-    color: #6b7280;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0;
-    animation: rise 1s ease forwards 0.8s;
+  .sec-head .glyph { color: var(--amber); }
+  .sec-head h2 { font-size: 1rem; margin: 0; color: var(--text); }
+
+  p { margin: 0 0 14px; max-width: 68ch; }
+
+  /* ---- projects ---- */
+  .proj {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    background: var(--bg-raised);
+    transition: border-color 0.15s ease;
+  }
+  .proj:hover { border-color: #3a4048; }
+  .proj-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .proj-name { color: var(--teal); font-weight: 600; font-size: 0.98rem; }
+  .proj-tag { color: var(--dim); font-size: 0.82rem; }
+  .proj p { margin: 10px 0 12px; color: var(--text); }
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.78rem;
+  }
+  .stack span {
+    color: var(--green);
+    background: #0d1a12;
+    border: 1px solid #1c3324;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* ---- skills as directory tree ---- */
+  .tree { color: var(--text); }
+  .tree .branch { color: var(--dim); }
+  .tree .cat { color: var(--amber); }
+  .tree div { margin: 3px 0; }
+
+  footer {
+    padding: 40px 0 60px;
+    color: var(--dim);
+    font-size: 0.85rem;
+  }
+  footer .prompt { color: var(--green); }
+
+  @media (max-width: 600px) {
+    .hero { padding-top: 40px; }
+    .role { font-size: 1.3rem; }
+    .term-body { padding: 18px 16px 22px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .boot-line { animation: none; opacity: 1; }
+    .cursor-blink { animation: none; }
   }
 </style>
 </head>
 <body>
-  <div class="stage">
-    <div class="glow"></div>
-    <h1>Hello, World<span class="cursor">&nbsp;</span></h1>
-    <div class="sub">deployed via GitHub Pages</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="term">
+      <div class="term-bar">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <span class="term-title">jon — session</span>
+      </div>
+      <div class="term-body">
+        <div class="boot-line" style="animation-delay:0.1s"><span class="prompt">guest@portfolio</span><span class="dim">:~$</span> whoami</div>
+        <div class="boot-line" style="animation-delay:0.5s"><span class="out">jon</span></div>
+        <div class="boot-line" style="animation-delay:0.9s"><span class="prompt">guest@portfolio</span><span class="dim">:~$</span> cat role.txt</div>
+        <div class="boot-line role" style="animation-delay:1.3s">IT Specialist <span class="accent">/</span> Systems &amp; Process Automation</div>
+        <div class="boot-line tagline" style="animation-delay:1.6s">15 years in enterprise IT — support, infrastructure, and building the scripts that quietly do the boring parts.</div>
+        <div class="boot-line" style="animation-delay:2s"><span class="prompt">guest@portfolio</span><span class="dim">:~$</span> <span class="cursor-blink"></span></div>
+      </div>
+    </div>
   </div>
+
+  <section id="about">
+    <div class="sec-head"><span class="glyph">#</span><h2>about</h2></div>
+    <p>I work in enterprise IT — a mix of hands-on support, infrastructure administration, and building small tools that remove repetitive manual work from day-to-day operations. My background spans large public-sector environments and smaller organizations, which means I've had to be equally comfortable following established process and building things from scratch when no process existed yet.</p>
+    <p>Most of what's below started the same way: someone was doing a task by hand, on a schedule, and it was slow, error-prone, or both. I like finding the smallest reliable fix.</p>
+  </section>
+
+  <section id="projects">
+    <div class="sec-head"><span class="glyph">#</span><h2>projects</h2></div>
+
+    <div class="proj">
+      <div class="proj-head">
+        <span class="proj-name">automated-statement-retrieval</span>
+        <span class="proj-tag">scheduled data pipeline</span>
+      </div>
+      <p>Replaced a manual, once-a-week process of logging into multiple portals to download financial statements with a scheduled script that connects via FTP, retrieves new files automatically, and sorts them into the right destination folders. Cut a recurring hour-plus task down to a few minutes of exception-checking.</p>
+      <div class="stack"><span>Python</span><span>FTP</span><span>task scheduling</span><span>file automation</span></div>
+    </div>
+
+    <div class="proj">
+      <div class="proj-head">
+        <span class="proj-name">ocr-reconciliation-pipeline</span>
+        <span class="proj-tag">document processing</span>
+      </div>
+      <p>Built a pipeline that pulls text out of scanned documents with OCR, parses the relevant fields, and cross-checks them against internal records to flag mismatches for review. Turned a manual line-by-line comparison into an automated first pass that only surfaces the exceptions worth a human's attention.</p>
+      <div class="stack"><span>Python</span><span>OCR</span><span>regex</span><span>data validation</span></div>
+    </div>
+
+    <div class="proj">
+      <div class="proj-head">
+        <span class="proj-name">cross-source-data-check</span>
+        <span class="proj-tag">reconciliation tool</span>
+      </div>
+      <p>A lightweight matching tool that compares transaction-level data across two independent sources and reports discrepancies — amounts, dates, or missing entries — instead of relying on someone manually reconciling spreadsheets side by side.</p>
+      <div class="stack"><span>Python</span><span>regex</span><span>pandas</span></div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head"><span class="glyph">#</span><h2>skills</h2></div>
+    <div class="tree">
+      <div><span class="branch">├──</span> <span class="cat">scripting</span> — Python, regex, shell</div>
+      <div><span class="branch">├──</span> <span class="cat">automation</span> — FTP/SFTP transfer, scheduled jobs, OCR pipelines</div>
+      <div><span class="branch">├──</span> <span class="cat">data</span> — reconciliation logic, validation, cross-source matching</div>
+      <div><span class="branch">├──</span> <span class="cat">systems</span> — enterprise IT support, Windows &amp; Linux environments</div>
+      <div><span class="branch">└──</span> <span class="cat">tools</span> — ticketing/workflow platforms, documentation, process design</div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="prompt">guest@portfolio</span><span class="dim">:~$</span> exit
+  </footer>
+
+</div>
+
 </body>
 </html>
