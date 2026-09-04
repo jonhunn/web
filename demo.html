@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jon — Reconciliation Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-raised: #11161d;
+    --line: #21262d;
+    --text: #c9d1d9;
+    --dim: #6e7681;
+    --amber: #e3b341;
+    --teal: #56d4dd;
+    --green: #7ee787;
+    --red: #ff7b72;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  a { color: var(--teal); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover { border-bottom-color: var(--teal); }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .back { color: var(--dim); font-size: 0.85rem; display: inline-block; margin-bottom: 24px; }
+  .back:hover { color: var(--teal); }
+
+  h1 { font-size: 1.3rem; margin: 0 0 6px; }
+  .sub { color: var(--dim); max-width: 62ch; margin: 0 0 32px; }
+
+  .panel {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin-bottom: 24px;
+  }
+  .panel h2 {
+    font-size: 0.85rem;
+    color: var(--amber);
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
+
+  .source-label { color: var(--dim); font-size: 0.78rem; margin-bottom: 8px; }
+  textarea {
+    width: 100%;
+    min-height: 190px;
+    background: #0a0e13;
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    resize: vertical;
+  }
+  textarea:focus { outline: 1px solid var(--teal); border-color: var(--teal); }
+
+  .run-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  button {
+    background: var(--amber);
+    color: #0d1117;
+    border: none;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button:hover { filter: brightness(1.08); }
+  button:active { filter: brightness(0.95); }
+  .hint { color: var(--dim); font-size: 0.78rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 4px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--dim); font-weight: 500; font-size: 0.75rem; text-transform: none; }
+  tr.matched td:first-child { border-left: 3px solid var(--green); }
+  tr.unmatched td:first-child { border-left: 3px solid var(--red); }
+  .status-matched { color: var(--green); }
+  .status-unmatched { color: var(--red); }
+
+  .summary { display: flex; gap: 24px; margin: 4px 0 18px; flex-wrap: wrap; }
+  .stat { }
+  .stat .n { font-size: 1.4rem; font-weight: 600; }
+  .stat .l { color: var(--dim); font-size: 0.75rem; }
+  .stat.ok .n { color: var(--green); }
+  .stat.bad .n { color: var(--red); }
+
+  .note {
+    color: var(--dim);
+    font-size: 0.8rem;
+    margin-top: 28px;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="index.html">&larr; back</a>
+  <h1>cross-source-data-check — live demo</h1>
+  <p class="sub">This is a simplified version of the matching logic described on the homepage: it compares two lists of transactions from different sources and flags anything that doesn't line up — by amount and date — so a person only has to look at the exceptions instead of every row. All data below is fictional, generated for demonstration only.</p>
+
+  <div class="panel">
+    <h2>input</h2>
+    <div class="cols">
+      <div>
+        <div class="source-label">source A — one row per line, as "date, amount"</div>
+        <textarea id="srcA">2026-08-01, 128.50
+2026-08-02, 74.00
+2026-08-03, 212.10
+2026-08-05, 19.99
+2026-08-06, 340.00
+2026-08-07, 56.25</textarea>
+      </div>
+      <div>
+        <div class="source-label">source B — one row per line, as "date, amount"</div>
+        <textarea id="srcB">2026-08-01, 128.50
+2026-08-02, 74.00
+2026-08-03, 212.10
+2026-08-06, 340.00
+2026-08-07, 56.20
+2026-08-08, 90.00</textarea>
+      </div>
+    </div>
+    <div class="run-row">
+      <button onclick="reconcile()">Run reconciliation</button>
+      <span class="hint">edit either list and re-run — try adding, removing, or changing a value</span>
+    </div>
+  </div>
+
+  <div class="panel" id="results" style="display:none;">
+    <h2>output</h2>
+    <div class="summary">
+      <div class="stat ok"><div class="n" id="statMatched">0</div><div class="l">matched</div></div>
+      <div class="stat bad"><div class="n" id="statUnmatched">0</div><div class="l">exceptions</div></div>
+      <div class="stat"><div class="n" id="statTotal">0</div><div class="l">total rows compared</div></div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>date</th><th>source A</th><th>source B</th><th>status</th></tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+  </div>
+
+  <p class="note">In the real pipeline, source A and B are pulled automatically (via the FTP retrieval step) rather than pasted by hand, and the matching handles multiple entries per day, tolerances for rounding, and a review queue for anything flagged. This page keeps the core comparison logic visible and interactive.</p>
+
+</div>
+
+<script>
+function parseRows(text) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+    const [date, amt] = line.split(',').map(s => s.trim());
+    return { date, amount: parseFloat(amt) };
+  });
+}
+
+function reconcile() {
+  const a = parseRows(document.getElementById('srcA').value);
+  const b = parseRows(document.getElementById('srcB').value);
+
+  const bByDate = {};
+  b.forEach(r => { (bByDate[r.date] = bByDate[r.date] || []).push(r); });
+
+  const dates = Array.from(new Set([...a.map(r => r.date), ...b.map(r => r.date)])).sort();
+
+  let matched = 0, unmatched = 0;
+  const rows = [];
+
+  dates.forEach(date => {
+    const aEntry = a.find(r => r.date === date);
+    const bEntry = b.find(r => r.date === date);
+    const aAmt = aEntry ? aEntry.amount.toFixed(2) : null;
+    const bAmt = bEntry ? bEntry.amount.toFixed(2) : null;
+    const isMatch = aAmt !== null && bAmt !== null && aAmt === bAmt;
+    if (isMatch) matched++; else unmatched++;
+    rows.push({ date, aAmt, bAmt, isMatch });
+  });
+
+  document.getElementById('statMatched').textContent = matched;
+  document.getElementById('statUnmatched').textContent = unmatched;
+  document.getElementById('statTotal').textContent = rows.length;
+
+  const body = document.getElementById('resultBody');
+  body.innerHTML = rows.map(r => `
+    <tr class="${r.isMatch ? 'matched' : 'unmatched'}">
+      <td>${r.date}</td>
+      <td>${r.aAmt !== null ? '$' + r.aAmt : '—'}</td>
+      <td>${r.bAmt !== null ? '$' + r.bAmt : '—'}</td>
+      <td class="${r.isMatch ? 'status-matched' : 'status-unmatched'}">${r.isMatch ? 'matched' : 'exception'}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('results').style.display = 'block';
+}
+
+reconcile();
+</script>
+
+</body>
+</html>
